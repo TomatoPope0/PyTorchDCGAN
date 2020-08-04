@@ -14,12 +14,11 @@ MODEL_PATH = "./Models/G-%d.pt" % args.epochs
 OUTPUT_PATH = "./Outputs/G-%d/" % args.epochs
 NUM_IMAGES = 10
 
-print(IMAGE_SIZE)
 G = Generator(NUM_NOISES, NUM_COLORS, DEPTHS, IMAGE_SIZE)
 G.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 
 for i in range(NUM_IMAGES):
     noise = torch.FloatTensor(NUM_NOISES).uniform_(-1, 1)
     fake = G(noise)
-    image = T.ToPILImage()(fake)
+    image = T.ToPILImage()(fake.view(1, IMAGE_SIZE, IMAGE_SIZE))
     image.save(path.join(OUTPUT_PATH, "image%d.bmp" % i))
