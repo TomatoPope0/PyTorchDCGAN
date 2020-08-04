@@ -121,4 +121,4 @@ if __name__ == "__main__":
                 lossG = 0.0
                 lossD = 0.0
 
-    torch.save(G, "./Models/G-%d.pt" % NUM_EPOCHS)
+    torch.save(G.state_dict(), "./Models/G-%d.pt" % NUM_EPOCHS)
