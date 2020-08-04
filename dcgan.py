@@ -43,12 +43,16 @@ class Discriminator(nn.Module):
         
         self.conv = nn.Sequential(
             nn.Conv2d(num_colors, num_depth, 4, 2, 1, bias=False),
+            nn.LeakyReLU(),
             nn.Conv2d(num_depth, num_depth * 2, 4, 2, 1),
             nn.BatchNorm2d(num_depth * 2),
+            nn.LeakyReLU(),
             nn.Conv2d(num_depth * 2, num_depth * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(num_depth * 4),
+            nn.LeakyReLU(),
             nn.Conv2d(num_depth * 4, num_depth * 8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(num_depth * 8),
+            nn.LeakyReLU(),
             # Paper is unclear about what does "flattened and then fed
             # into a single sigmoid output" mean; I'll use nn.Linear()
             nn.Flatten(),
