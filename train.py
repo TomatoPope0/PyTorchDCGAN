@@ -83,20 +83,21 @@ if __name__ == "__main__":
         for i, data in enumerate(mnist_loader):
             data = data[0].to(device)
             data = data.reshape(-1, NUM_COLORS, IMAGE_SIZE, IMAGE_SIZE)
+            local_batch_size = data.shape[0]
 
             # Train D with genuine data
             optimizerD.zero_grad()
 
             output = D(data)
-            loss_d_genuine = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
+            loss_d_genuine = criterion(output, torch.ones((local_batch_size, 1), device=device))
             loss_d_genuine.backward()
 
             # Train D with fake data
-            noise = torch.FloatTensor(BATCH_SIZE, NUM_NOISES).uniform_(-1, 1)
+            noise = torch.FloatTensor(local_batch_size, NUM_NOISES).uniform_(-1, 1)
             fake = G(noise)
 
             output = D(fake.detach())
-            loss_d_fake = criterion(output, torch.zeros((BATCH_SIZE, 1), device=device))
+            loss_d_fake = criterion(output, torch.zeros((local_batch_size, 1), device=device))
             loss_d_fake.backward()
 
             optimizerD.step()
@@ -107,7 +108,7 @@ if __name__ == "__main__":
             optimizerG.zero_grad()
 
             output = D(fake)
-            loss_g = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
+            loss_g = criterion(output, torch.ones((local_batch_size, 1), device=device))
             loss_g.backward()
 
             optimizerG.step()
