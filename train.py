@@ -20,10 +20,10 @@ NUM_EPOCHS = 90
 REPORT_RATE = 100
 
 # Model Parameters
+DEPTHS = 128
+IMAGE_SIZE = 32
 NUM_NOISES = 100
 NUM_COLORS = 1
-NUM_DEPTHS = 128
-IMAGE_SIZE = 32
 
 # Device Initialization
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -56,10 +56,10 @@ def init_weights(m):
     # elif classname.find('BatchNorm') != -1:
     #    pass
             
-G = Generator(NUM_NOISES, NUM_COLORS, NUM_DEPTHS, IMAGE_SIZE).to(device)
+G = Generator(NUM_NOISES, NUM_COLORS, DEPTHS, IMAGE_SIZE).to(device)
 G.apply(init_weights)
 
-D = Discriminator(NUM_COLORS, NUM_DEPTHS, IMAGE_SIZE).to(device)
+D = Discriminator(NUM_COLORS, DEPTHS, IMAGE_SIZE).to(device)
 D.apply(init_weights)
 
 # Assume BCELoss, since it's based on GAN (Goodfellow, 2014)
