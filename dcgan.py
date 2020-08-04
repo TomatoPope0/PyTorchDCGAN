@@ -11,7 +11,7 @@ class Generator(nn.Module):
         self.final_size = image_size // 16
         self.depths = depths
 
-        self.lin = nn.Linear(num_noises, depths * 8 * image_size * image_size)
+        self.lin = nn.Linear(num_noises, depths * 8 * self.final_size * self.final_size)
         # Some calculations behind deciding kernel size, stride, padding:
         # (x+2p-k)/s+1=x/2 <=> s != 0 or 2, k = ... or p = k/2 - 1, s = 2
         # => Choose k = 4, s = 2, p = 1
