@@ -15,6 +15,15 @@ WEIGHT_STD = 0.02
 LEARNING_RATE = 0.0002
 BETA1 = 0.5
 BETA2 = 0.99
+## Training
+NUM_EPOCHS = 90
+REPORT_RATE = 100
+
+# Model Parameters
+NUM_NOISES = 100
+NUM_COLORS = 1
+NUM_DEPTHS = 128
+IMAGE_SIZE = 32
 
 # Device Initialization
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -47,21 +56,21 @@ def init_weights(m):
     # elif classname.find('BatchNorm') != -1:
     #    pass
             
-G = Generator().to(device)
+G = Generator(NUM_NOISES, NUM_COLORS, NUM_DEPTHS, IMAGE_SIZE).to(device)
 G.apply(init_weights)
 
-D = Discriminator().to(device)
+D = Discriminator(NUM_COLORS, NUM_DEPTHS, IMAGE_SIZE).to(device)
 D.apply(init_weights)
 
 # Assume BCELoss, since it's based on GAN (Goodfellow, 2014)
 criterion = nn.BCELoss()
 optimizerG = torch.optim.Adam(
-    G.parameters,
+    G.parameters(),
     lr=LEARNING_RATE,
     betas=[BETA1, BETA2]
 )
-optmizerD = torch.optim.Adam(
-    D.parameters,
+optimizerD = torch.optim.Adam(
+    D.parameters(),
     lr=LEARNING_RATE,
     betas=[BETA1, BETA2]
 )
@@ -69,4 +78,45 @@ optmizerD = torch.optim.Adam(
 # On windows, using multi-worker DataLoader outside of
 # if causes recursive process creation (runtime error)
 if __name__ == "__main__":
-    pass
+    for epoch in range(NUM_EPOCHS):
+        lossG = 0.0
+        lossD = 0.0
+        for i, data in enumerate(mnist_loader):
+            _, data = data.to(device)
+
+            # Train D with genuine data
+            optimizerD.zero_grad()
+
+            output = D(data)
+            loss = criterion(output, torch.ones((BATCH_SIZE, 1)))
+            loss.backward()
+            lossD = loss.item()
+
+            # Train D with fake data
+            noise = torch.FloatTensor(NUM_NOISES).uniform_(-1, 1)
+            fake = G(noise)
+
+            output = D(fake)
+            loss = criterion(output, torch.zeros((BATCH_SIZE, 1)))
+            loss.backward()
+            lossD += loss.item()
+
+            optimizerD.step()
+
+            # Train G
+            optimizerG.zero_grad()
+
+            output = D(fake)
+            loss = criterion(output, torch.ones((BATCH_SIZE, 1)))
+            loss.backward()
+            lossG += loss.item()
+
+            optimizerG.step()
+
+            if i % REPORT_RATE == REPORT_RATE-1:
+                print("Epoch: %d - [D: %d, G: %d]" % 
+                    (epoch, lossD / REPORT_RATE*2, lossG / REPORT_RATE))
+                lossG = 0.0
+                lossD = 0.0
+
+    torch.save(G, "./Models/G-%d.pt" % NUM_EPOCHS)
