@@ -84,6 +84,8 @@ if __name__ == "__main__":
         lossD = 0.0
         for i, data in enumerate(mnist_loader):
             data = data[0].to(device)
+            data = data.reshape(BATCH_SIZE, NUM_COLORS, IMAGE_SIZE, IMAGE_SIZE)
+
             # Train D with genuine data
             optimizerD.zero_grad()
 

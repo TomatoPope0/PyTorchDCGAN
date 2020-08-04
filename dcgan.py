@@ -41,6 +41,7 @@ class Discriminator(nn.Module):
         if image_size % 16 != 0:
             raise Exception("Size of the image must be divisible by 16")
         
+        final_size = image_size // 16
         self.conv = nn.Sequential(
             nn.Conv2d(num_colors, depths, 4, 2, 1, bias=False),
             nn.LeakyReLU(),
@@ -56,10 +57,18 @@ class Discriminator(nn.Module):
             # Paper is unclear about what does "flattened and then fed
             # into a single sigmoid output" mean; I'll use nn.Linear()
             nn.Flatten(),
-            nn.Linear(depths * 8 * image_size * image_size, 1),
+            nn.Linear(depths * 8 * final_size * final_size, 1),
             nn.Sigmoid()
         )
 
     def forward(self, x):
         pred = self.conv(x)
         return pred
+
+class PrintShape(nn.Module):
+    def __init__(self):
+        super(PrintShape, self).__init__()
+
+    def forward(self, x):
+        print(x.shape)
+        return x
