@@ -2,14 +2,14 @@ import os.path as path
 import torch.cuda
 import torchvision.transforms as T
 from dcgan import Generator
-from train import NUM_NOISES
+from train import DEPTHS, IMAGE_SIZE, NUM_NOISES, NUM_COLORS
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL_PATH = "./Models/G-10.pt"
-OUTPUT_PATH = "./Outputs/G-10/"
+MODEL_PATH = "./Models/G-1.pt"
+OUTPUT_PATH = "./Outputs/G-1/"
 NUM_IMAGES = 10
 
-G = Generator()
+G = Generator(DEPTHS, IMAGE_SIZE, NUM_NOISES, NUM_COLORS)
 G.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 
 for i in range(NUM_IMAGES):
