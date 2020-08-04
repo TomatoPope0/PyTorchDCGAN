@@ -6,7 +6,7 @@ from dcgan import Generator, Discriminator
 
 # Hyperparameters
 ## Data Loader
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 NUM_WORKERS = 4
 ## Weight Initialization
 WEIGHT_MEAN = 0
@@ -16,8 +16,8 @@ LEARNING_RATE = 0.0002
 BETA1 = 0.5
 BETA2 = 0.99
 ## Training
-NUM_EPOCHS = 90
-REPORT_RATE = 100
+NUM_EPOCHS = 1
+REPORT_RATE = 50
 
 # Model Parameters
 DEPTHS = 128
@@ -80,44 +80,41 @@ optimizerD = torch.optim.Adam(
 # if causes recursive process creation (runtime error)
 if __name__ == "__main__":
     for epoch in range(NUM_EPOCHS):
-        lossG = 0.0
-        lossD = 0.0
         for i, data in enumerate(mnist_loader):
             data = data[0].to(device)
-            data = data.reshape(BATCH_SIZE, NUM_COLORS, IMAGE_SIZE, IMAGE_SIZE)
+            data = data.reshape(-1, NUM_COLORS, IMAGE_SIZE, IMAGE_SIZE)
 
             # Train D with genuine data
             optimizerD.zero_grad()
 
             output = D(data)
-            loss = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
-            loss.backward()
-            lossD = loss.item()
+            loss_d_genuine = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
+            loss_d_genuine.backward()
 
             # Train D with fake data
             noise = torch.FloatTensor(BATCH_SIZE, NUM_NOISES).uniform_(-1, 1)
             fake = G(noise)
 
-            output = D(fake)
-            loss = criterion(output, torch.zeros((BATCH_SIZE, 1), device=device))
-            loss.backward()
-            lossD += loss.item()
+            output = D(fake.detach())
+            loss_d_fake = criterion(output, torch.zeros((BATCH_SIZE, 1), device=device))
+            loss_d_fake.backward()
 
             optimizerD.step()
+
+            loss_d = loss_d_genuine + loss_d_fake
 
             # Train G
             optimizerG.zero_grad()
 
             output = D(fake)
-            loss = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
-            loss.backward()
-            lossG += loss.item()
+            loss_g = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
+            loss_g.backward()
 
             optimizerG.step()
 
             if i % REPORT_RATE == REPORT_RATE-1:
-                print("Epoch: %d - [D: %d, G: %d]" % 
-                    (epoch, lossD / REPORT_RATE*2, lossG / REPORT_RATE))
+                print("Epoch: %d - [D: %.7f, G: %.7f]" %
+                    (epoch, loss_d.item(), loss_g.item()))
                 lossG = 0.0
                 lossD = 0.0
 
