@@ -82,8 +82,7 @@ if __name__ == "__main__":
         lossG = 0.0
         lossD = 0.0
         for i, data in enumerate(mnist_loader):
-            _, data = data.to(device)
-
+            data = data[0].to(device)
             # Train D with genuine data
             optimizerD.zero_grad()
 
