@@ -32,6 +32,7 @@ mnist_train = torchvision.datasets.MNIST(
     "../Datasets/MNIST_PyTorch",
     train=True,
     transform=transforms.Compose([
+        transforms.Resize(IMAGE_SIZE),
         transforms.ToTensor(),
         # ToTensor() returns [0, 1]-ranged tensor.
         # Normalize() performs x' = (x - m)/s for every channel
