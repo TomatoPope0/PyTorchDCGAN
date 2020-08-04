@@ -90,7 +90,7 @@ if __name__ == "__main__":
             optimizerD.zero_grad()
 
             output = D(data)
-            loss = criterion(output, torch.ones((BATCH_SIZE, 1)))
+            loss = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
             loss.backward()
             lossD = loss.item()
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
             fake = G(noise)
 
             output = D(fake)
-            loss = criterion(output, torch.zeros((BATCH_SIZE, 1)))
+            loss = criterion(output, torch.zeros((BATCH_SIZE, 1), device=device))
             loss.backward()
             lossD += loss.item()
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
             optimizerG.zero_grad()
 
             output = D(fake)
-            loss = criterion(output, torch.ones((BATCH_SIZE, 1)))
+            loss = criterion(output, torch.ones((BATCH_SIZE, 1), device=device))
             loss.backward()
             lossG += loss.item()
 
