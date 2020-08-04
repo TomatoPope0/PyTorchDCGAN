@@ -8,7 +8,8 @@ class Generator(nn.Module):
 
         if image_size % 16 != 0:
             raise Exception("Size of the image must be divisible by 16")
-        self.image_size = image_size
+        self.final_size = image_size // 16
+        self.depths = depths
 
         self.lin = nn.Linear(num_noises, depths * 8 * image_size * image_size)
         # Some calculations behind deciding kernel size, stride, padding:
@@ -31,7 +32,7 @@ class Generator(nn.Module):
     
     def forward(self, x):
         lin_out = self.lin(x)
-        conv_out = self.conv(lin_out.view(-1, self.image_size, self.image_size))
+        conv_out = self.conv(lin_out.view(-1, self.depths * 8, self.final_size, self.final_size))
         return conv_out
 
 class Discriminator(nn.Module):
