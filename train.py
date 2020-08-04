@@ -93,7 +93,7 @@ if __name__ == "__main__":
             loss_d_genuine.backward()
 
             # Train D with fake data
-            noise = torch.FloatTensor(local_batch_size, NUM_NOISES).uniform_(-1, 1)
+            noise = torch.FloatTensor(local_batch_size, NUM_NOISES).uniform_(-1, 1).to(device)
             fake = G(noise)
 
             output = D(fake.detach())
