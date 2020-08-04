@@ -1,10 +1,17 @@
 import torch
+import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
+from dcgan import Generator, Discriminator
 
 # Hyperparameters
 BATCH_SIZE = 128
 NUM_WORKERS = 4
+WEIGHT_MEAN = 0
+WEIGHT_STD = 0.02
+
+# Device Initialization
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 mnist_train = torchvision.datasets.MNIST(
     "../Datasets/MNIST_PyTorch",
@@ -24,6 +31,22 @@ mnist_loader = torch.utils.data.DataLoader(
     shuffle=True,
     num_workers=NUM_WORKERS
 )
+
+def init_weights(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.normal_(m.weight.data, WEIGHT_MEAN, WEIGHT_STD)
+    # As the paper doesn't specify about the initialization of Batch Normalization,
+    # I'll leave it default
+    # elif classname.find('BatchNorm') != -1:
+    #    pass
+            
+
+G = Generator().to(device)
+G.apply(init_weights)
+
+D = Discriminator().to(device)
+D.apply(init_weights)
 
 # On windows, using multi-worker DataLoader outside of
 # if causes recursive process creation (runtime error)
