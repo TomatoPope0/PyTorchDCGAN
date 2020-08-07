@@ -1,6 +1,7 @@
 import argparse
 import os.path as path
 import torch.cuda
+import torchvision
 import torchvision.transforms as T
 from dcgan import Generator
 from train import DEPTHS, IMAGE_SIZE, NUM_NOISES, NUM_COLORS
@@ -20,5 +21,7 @@ G.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 for i in range(NUM_IMAGES):
     noise = torch.FloatTensor(NUM_NOISES).uniform_(-1, 1)
     fake = G(noise)
-    image = T.ToPILImage()(fake.view(1, IMAGE_SIZE, IMAGE_SIZE))
-    image.save(path.join(OUTPUT_PATH, "image%d.bmp" % i))
+    torchvision.utils.save_image(
+        fake.view(NUM_COLORS, IMAGE_SIZE, IMAGE_SIZE),
+        path.join(OUTPUT_PATH, "image%d.bmp" % i)
+    )
